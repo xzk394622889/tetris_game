@@ -3,6 +3,16 @@
 
 import random
 
+import pygame
+
+# 初始化pygame
+pygame.init()
+pygame.mixer.init()
+
+# 加载音效
+rotate_sound = pygame.mixer.Sound("rotate.wav")
+land_sound = pygame.mixer.Sound("land.wav")
+
 class Shape(object):
     shapeNone = 0
     shapeI = 1
@@ -150,10 +160,14 @@ class BoardData(object):
             self.currentDirection += 1
             self.currentDirection %= 4
 
+            pygame.mixer.Sound.play(rotate_sound)  # 播放旋转音效
+
     def rotateLeft(self):
         if self.tryMoveCurrent((self.currentDirection - 1) % 4, self.currentX, self.currentY):
             self.currentDirection -= 1
             self.currentDirection %= 4
+
+            pygame.mixer.Sound.play(rotate_sound)
 
     def removeFullLines(self):
         newBackBoard = [0] * BoardData.width * BoardData.height
@@ -174,6 +188,8 @@ class BoardData(object):
     def mergePiece(self):
         for x, y in self.currentShape.getCoords(self.currentDirection, self.currentX, self.currentY):
             self.backBoard[x + y * BoardData.width] = self.currentShape.shape
+
+        pygame.mixer.Sound.play(land_sound)  # 播放触底音效
 
         self.currentX = -1
         self.currentY = -1
