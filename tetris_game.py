@@ -41,7 +41,7 @@ class Tetris(QMainWindow):
         self.start()
 
         self.center()
-        self.setWindowTitle('Tetris')
+        self.setWindowTitle('曾曾の思思')
         self.show()
 
         self.setFixedSize(self.tboard.width() + self.sidePanel.width(),
@@ -195,6 +195,10 @@ class Board(QFrame):
 
     def paintEvent(self, event):
         painter = QPainter(self)
+
+        # Draw the grid background
+        self.drawGrid(painter)
+
         # Draw backboard
         for x in range(BOARD_DATA.width):
             for y in range(BOARD_DATA.height):
@@ -211,6 +215,15 @@ class Board(QFrame):
         painter.drawLine(self.width()-1, 0, self.width()-1, self.height())
         painter.setPen(QColor(0xCCCCCC))
         painter.drawLine(self.width(), 0, self.width(), self.height())
+
+    def drawGrid(self, painter):
+        for i in range(BOARD_DATA.width):
+            for j in range(BOARD_DATA.height):
+                painter.setPen(QColor(0x191970))  # Gray color for the grid lines
+                painter.drawLine(i * self.gridSize, 0, i * self.gridSize, self.height())
+                painter.drawLine(0, j * self.gridSize, self.width(), j * self.gridSize)
+        painter.setPen(QColor(0x191970))
+        painter.drawRect(0, 0, self.width() - 1, self.height() - 1)
 
     def updateData(self):
         self.msg2Statusbar.emit(str(self.score))
