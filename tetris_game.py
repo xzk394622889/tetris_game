@@ -4,7 +4,7 @@
 import sys, random
 from PyQt5.QtWidgets import QMainWindow, QFrame, QDesktopWidget, QApplication, QHBoxLayout, QLabel
 from PyQt5.QtCore import Qt, QBasicTimer, pyqtSignal
-from PyQt5.QtGui import QPainter, QColor
+from PyQt5.QtGui import QPainter, QColor, QFont
 
 from tetris_model import BOARD_DATA, Shape
 from tetris_ai import TETRIS_AI
@@ -163,8 +163,28 @@ class SidePanel(QFrame):
         self.move(gridSize * BOARD_DATA.width, 0)
         self.gridSize = gridSize
 
+        # 设置得分标签的位置和文字
+        self.linesLabel = QLabel('消除行: 0', self)
+        self.linesLabel.move(66, self.gridSize * 10)
+        self.linesLabel.setFont(QFont('Arial', 16))
+        self.linesLabel.resize(self.width() - 20, 30)
+
+        self.scoreLabel = QLabel('当前得分: 0', self)
+        self.scoreLabel.move(66, self.gridSize * 11)
+        self.scoreLabel.setFont(QFont('Arial', 16))
+        self.scoreLabel.resize(self.width() - 20, 30)
+
+        self.highScoreLabel = QLabel('历史最高分: 0', self)
+        self.highScoreLabel.move(66, self.gridSize * 12)
+        self.highScoreLabel.setFont(QFont('Arial', 16))
+        self.highScoreLabel.resize(self.width() - 20, 30)
+
     def updateData(self):
         self.update()
+        boardData = BOARD_DATA  # 访问BoardData实例
+        self.linesLabel.setText(f'消除行: {boardData.linesRemoved}')
+        self.scoreLabel.setText(f'当前得分: {boardData.score}')
+        self.highScoreLabel.setText(f'历史最高分: {boardData.highScore}')
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -185,6 +205,7 @@ class Board(QFrame):
 
     def __init__(self, parent, gridSize):
         super().__init__(parent)
+
         self.setFixedSize(gridSize * BOARD_DATA.width, gridSize * BOARD_DATA.height)
         self.gridSize = gridSize
         self.initBoard()

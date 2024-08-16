@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-
+import pickle
 import random
 
 import pygame
@@ -74,12 +74,12 @@ class Shape(object):
                 maxY = y
         return (minX, maxX, minY, maxY)
 
-
 class BoardData(object):
     width = 10
     height = 22
 
     def __init__(self):
+        self.score = None
         self.backBoard = [0] * BoardData.width * BoardData.height
 
         self.currentX = -1
@@ -89,6 +89,10 @@ class BoardData(object):
         self.nextShape = Shape(random.randint(1, 7))
 
         self.shapeStat = [0] * 8
+
+        self.score = 0  # 得分
+        self.linesRemoved = 0  # 消除行数
+        self.highScore = self.loadHighScore()
 
     def getData(self):
         return self.backBoard[:]
@@ -172,7 +176,7 @@ class BoardData(object):
     def removeFullLines(self):
         newBackBoard = [0] * BoardData.width * BoardData.height
         newY = BoardData.height - 1
-        lines = 0
+        self.linesRemoved = 0  # 重置行数计数器
         for y in range(BoardData.height - 1, -1, -1):
             blockCount = sum([1 if self.backBoard[x + y * BoardData.width] > 0 else 0 for x in range(BoardData.width)])
             if blockCount < BoardData.width:
@@ -180,10 +184,30 @@ class BoardData(object):
                     newBackBoard[x + newY * BoardData.width] = self.backBoard[x + y * BoardData.width]
                 newY -= 1
             else:
-                lines += 1
-        if lines > 0:
+                self.linesRemoved += 1
+        if self.linesRemoved > 0:
             self.backBoard = newBackBoard
-        return lines
+            self.updateScore(self.linesRemoved)
+        return self.linesRemoved
+
+    def updateScore(self, linesRemoved):
+        scores = {1: 100, 2: 300, 3: 600, 4: 1000}
+        if linesRemoved in scores:
+            self.score += scores[linesRemoved]
+            if self.score > self.highScore:
+                self.highScore = self.score
+                self.saveHighScore(self.highScore)
+
+    def loadHighScore(self):
+        try:
+            with open("highscore.txt", "r") as f:
+                return int(f.read())
+        except:
+            return 0
+
+    def saveHighScore(self, score):
+        with open("highscore.txt", "w") as f:
+            f.write(str(score))
 
     def mergePiece(self):
         for x, y in self.currentShape.getCoords(self.currentDirection, self.currentX, self.currentY):
